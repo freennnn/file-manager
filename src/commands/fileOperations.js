@@ -1,12 +1,28 @@
 import fs from "fs/promises";
-import { createReadStream, createWriteStream, read } from "fs";
+import { copyFile, createReadStream, createWriteStream, read } from "fs";
 import { pipeline } from "node:stream/promises";
 import * as fsExtra from "../fsExtra.js";
 import ERRORS from "../errors.js";
-import { resolve } from "path";
-import { rejects } from "assert";
 
-async function copyFile(oldPath, newPath) {
+export async function add(newFilePath) {
+  await fs.writeFile(newFilePath, "");
+}
+
+export async function rn(oldPath, newPath) {
+  let fileExistsAtOldPath = false;
+  fileExistsAtOldPath = await fsExtra.isPathToValidFile(oldPath);
+  if (fileExistsAtOldPath) {
+    try {
+      await fs.rename(oldPath, newPath);
+    } catch {
+      throw new Error(ERRORS.operationFailed);
+    }
+  } else {
+    throw new Error(ERRORS.invalidInput);
+  }
+}
+
+export async function cp(oldPath, newPath) {
   let fileExistsAtOldPath = false;
   fileExistsAtOldPath = await fsExtra.isPathToValidFile(oldPath);
   if (fileExistsAtOldPath) {
@@ -22,7 +38,7 @@ async function copyFile(oldPath, newPath) {
   }
 }
 
-async function removeFile(path) {
+export async function rm(path) {
   let fileExistsAtPath = false;
   fileExistsAtPath = await fsExtra.isPathToValidFile(path);
   if (fileExistsAtPath) {
@@ -35,6 +51,11 @@ async function removeFile(path) {
   } else {
     throw new Error(ERRORS.invalidInput);
   }
+}
+
+export async function mv(oldPath, newPath) {
+  await cp(oldPath, newPath);
+  await rm(oldPath);
 }
 
 export async function cat(path) {
