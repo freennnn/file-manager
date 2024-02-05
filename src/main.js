@@ -43,7 +43,7 @@ export class FileManager {
     const intf = createInterface({ input: process.stdin, output: process.stdout });
   
     while (true) {
-      const input = await intf.question(`You are currently in ${this._currentDir}\n`);
+      const input = await intf.question(`You are currently in ${this._currentDir}\n\n`);
       try {
         await this._executeCommand(input);
       } catch (err) {
