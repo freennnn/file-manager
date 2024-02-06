@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { ReadStream } from 'fs';
 import * as fsExtra from '../fsExtra.js';
+import ERRORS from "../errors.js";
 
  export default async function calculateHash(pathToFile) {
   let fileExistsAtPath = false;
