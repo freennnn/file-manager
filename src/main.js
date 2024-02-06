@@ -4,6 +4,9 @@ import os from "os";
 import * as pathModule from "path";
 import * as fileOperations from "./commands/fileOperations.js";
 import * as dirNavigation from "./commands/dirNavigation.js";
+import hash from "./commands/hash.js";
+import printSystem from "./commands/system.js";
+import { compress, decompress } from "./commands/compress.js"
 
 export class FileManager {
   constructor() {
@@ -145,19 +148,35 @@ export class FileManager {
   }
 
   async _hash(args) {
+    if (args.length > 0) {
+      const pathToFile = this._applyNewPath(args[0]);
+      await fileOperations.rm(pathToFile);
 
+    } else {
+      throw new Error(ERRORS.invalidInput);
+    }
   }
 
   async _compress(args) {
-
+    if (args.length > 1) {
+    } else {
+      throw new Error(ERRORS.invalidInput);
+    }
   }
 
   async _decompress(args) {
-
+    if (args.length > 1) {
+    } else {
+      throw new Error(ERRORS.invalidInput);
+    }
   }
 
   async _os(args) {
-
+    if (args.length > 0) {
+      printSystem(args[0].slice(2));
+    } else {
+      throw new Error(ERRORS.invalidInput);
+    }
   }
 
   _exit() {

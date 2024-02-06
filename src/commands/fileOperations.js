@@ -5,7 +5,7 @@ import * as fsExtra from "../fsExtra.js";
 import ERRORS from "../errors.js";
 
 export async function add(newFilePath) {
-  await fs.writeFile(newFilePath, "");
+  await fs.writeFile(newFilePath, "", { flag: "wx+" });
 }
 
 export async function rn(oldPath, newPath) {

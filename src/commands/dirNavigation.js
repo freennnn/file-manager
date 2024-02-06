@@ -17,9 +17,9 @@ export async function ls(pathToDir) {
   try {
     let elements = await fs.readdir(pathToDir, { withFileTypes: true });
     let directories = elements.filter(el => el.isDirectory());
-    let otherElements = elements.filter(el => !el.isDirectory());
+    let files = elements.filter(el => el.isFile());
     const dirStrings = directories.sort().map(el => { return { Name: el.name, Type: "Directory"}});
-    const fileStrings = otherElements.sort().map(el => { return { Name: el.name, Type: "File"}});
+    const fileStrings = files.sort().map(el => { return { Name: el.name, Type: "File"}});
     console.table(dirStrings.concat(fileStrings));
 
   } catch {
