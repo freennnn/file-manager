@@ -71,7 +71,7 @@ export async function cat(path) {
       readable.pipe(process.stdout);
       await new Promise((resolve, rejects) => {
         readable.on("end", () => resolve());
-        readable.on("error", () => reject());
+        readable.on("error", (err) => reject(err));
       });
     }
     catch {

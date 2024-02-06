@@ -4,7 +4,7 @@ import os from "os";
 import * as pathModule from "path";
 import * as fileOperations from "./commands/fileOperations.js";
 import * as dirNavigation from "./commands/dirNavigation.js";
-import hash from "./commands/hash.js";
+import calculateHash from "./commands/hash.js";
 import printSystem from "./commands/system.js";
 import { compress, decompress } from "./commands/compress.js"
 
@@ -150,8 +150,7 @@ export class FileManager {
   async _hash(args) {
     if (args.length > 0) {
       const pathToFile = this._applyNewPath(args[0]);
-      await fileOperations.rm(pathToFile);
-
+      await calculateHash(pathToFile);
     } else {
       throw new Error(ERRORS.invalidInput);
     }
