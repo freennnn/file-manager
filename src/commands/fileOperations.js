@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { copyFile, createReadStream, createWriteStream, read } from "fs";
+import { createReadStream, createWriteStream } from "fs";
 import { pipeline } from "node:stream/promises";
 import * as fsExtra from "../fsExtra.js";
 import ERRORS from "../errors.js";
@@ -27,7 +27,7 @@ export async function cp(oldPath, newPath) {
   fileExistsAtOldPath = await fsExtra.isPathToValidFile(oldPath);
   if (fileExistsAtOldPath) {
     try {
-      const readable = createReadStream(oldPath);
+      const readable = mvcreateReadStream(oldPath);
       const writeable = createWriteStream(newPath);
       await pipeline(readable, writeable);
     } catch {

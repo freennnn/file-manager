@@ -2,7 +2,8 @@ import { createInterface } from "readline/promises";
 import ERRORS from "./errors.js";
 import os from "os";
 import * as pathModule from "path";
-import * as fileOperations from "./commands/fileOperations.js"
+import * as fileOperations from "./commands/fileOperations.js";
+import * as dirNavigation from "./commands/dirNavigation.js";
 
 export class FileManager {
   constructor() {
@@ -49,7 +50,7 @@ export class FileManager {
     const intf = createInterface({ input: process.stdin, output: process.stdout });
   
     while (true) {
-      const input = await intf.question(`\nYou are currently in ${this._currentDir}\n\n`);
+      const input = await intf.question(`\nYou are currently in ${this._currentDir}\n`);
       try {
         await this._executeCommand(input);
       } catch (err) {
@@ -63,17 +64,22 @@ export class FileManager {
   }
 
   async _up() {
-    console.log("I'm up");
+    // console.log("I'm up");
     const newPath = this._applyNewPath("..");
-    this._currentDir = await fileOperations.cd(newPath);
+    this._currentDir = await dirNavigation.cd(newPath);
   }
 
   async _ls() {
-    console.log("I'm ls");
+    await dirNavigation.ls(this._currentDir);
   }
 
   async _cd(args) {
-    
+    if (args.length > 0) {
+      const newDirPath = this._applyNewPath(args[0]);
+      this._currentDir = await dirNavigation.cd(newDirPath);
+    } else {
+      throw new Error(ERRORS.invalidInput);
+    }
   }
 
   _cat = async (args) => {
