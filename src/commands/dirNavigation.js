@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import * as fsExtra from "../fsExtra.js";
 import ERRORS from "../errors.js";
-import path from "path";
  
 export async function cd(pathToDir) {
   let dirExistsAtPath = false;

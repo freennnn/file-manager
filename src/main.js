@@ -158,6 +158,9 @@ export class FileManager {
 
   async _compress(args) {
     if (args.length > 1) {
+      const pathToFile = this._applyNewPath(args[0]);
+      const pathToDestination = this._applyNewPath(args[1]);
+      await compress(pathToFile, pathToDestination);
     } else {
       throw new Error(ERRORS.invalidInput);
     }
@@ -165,6 +168,9 @@ export class FileManager {
 
   async _decompress(args) {
     if (args.length > 1) {
+      const pathToFile = this._applyNewPath(args[0]);
+      const pathToDestination = this._applyNewPath(args[1]);
+      await decompress(pathToFile, pathToDestination);
     } else {
       throw new Error(ERRORS.invalidInput);
     }
