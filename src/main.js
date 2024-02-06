@@ -34,8 +34,8 @@ export class FileManager {
 
     let commandFunction = this._commands[command];
     if (commandFunction) { // each command will validate received args on its own (args number and if filePath is valid)
-      console.log("Great command, you are great, everything works - looks like max points are well deserved!")
-      await this._commands[command](args);//bind(this)
+      await this._commands[command](args); //bind(this)
+      console.log("success: great command, you are great, everything works - looks like max points are well deserved!")
     } else {
       throw new Error(ERRORS.invalidInput);
     }
@@ -78,9 +78,9 @@ export class FileManager {
 
   _cat = async (args) => {
     if (args.length > 0) {
-      //console.log(`Cat args: ${args}`)
-      const newPath = this._applyNewPath(args[0]);
-      await fileOperations.cat(newPath);
+      //console.log(`cat args: ${args}`)
+      const filePath = this._applyNewPath(args[0]);
+      await fileOperations.cat(filePath);
     } else {
       throw new Error(ERRORS.invalidInput);
     }
@@ -98,8 +98,9 @@ export class FileManager {
 
   async _cp(args) {
     if (args.length > 1) {
-      const oldPath = this._applyNewPath(args[0]);
-      const newPath = this._applyNewPath(args[1]);
+      const oldPath = this._applyNewPath(args[0]); // path to file
+      const newPath = pathModule.resolve(this._applyNewPath(args[1]), pathModule.basename(oldPath)); // args[1] - new directory path
+      // console.log(newPath);
       await fileOperations.cp(oldPath, newPath);
     } else {
       throw new Error(ERRORS.invalidInput);
@@ -109,9 +110,9 @@ export class FileManager {
 
   async _mv(args) {
     if (args.length > 1) {
-      const oldPath = this._applyNewPath(args[0]);
-      const newPath = this._applyNewPath(args[1]);
-      await fileOperations.cp(oldPath, newPath);
+      const oldPath = this._applyNewPath(args[0]); // args[0] - path_to_file
+      const newPath = pathModule.resolve(this._applyNewPath(args[1]), pathModule.basename(oldPath)); // args[1] - path_to_new_directory
+      await fileOperations.mv(oldPath, newPath);
     } else {
       throw new Error(ERRORS.invalidInput);
     }
@@ -119,9 +120,9 @@ export class FileManager {
 
   async _rn(args) {
     if (args.length > 1) {
-      const oldPath = this._applyNewPath(args[0]);
+      const oldPath = this._applyNewPath(args[0]); // path to new file
       const newDir = pathModule.dirname(oldPath);
-      const newPath = pathModule.resolve(newDir, args[1]);
+      const newPath = pathModule.resolve(newDir, args[1]); // cause second arg is just a new file Name
       await fileOperations.rn(oldPath, newPath);
     } else {
       throw new Error(ERRORS.invalidInput);

@@ -65,7 +65,7 @@ export async function cat(path) {
     try {
       const readable = createReadStream(path);
 
-      // For some stupid reason piplene() after successfully writing to stdout emits an error!
+      // For some stupid reason pipelene() after successfully writing to stdout emits an error!
       // await pipeline(readable, process.stdout, (err) => {console.log(err);});
 
       readable.pipe(process.stdout);
