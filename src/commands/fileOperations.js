@@ -27,7 +27,7 @@ export async function cp(oldPath, newPath) {
   fileExistsAtOldPath = await fsExtra.isPathToValidFile(oldPath);
   if (fileExistsAtOldPath) {
     try {
-      const readable = mvcreateReadStream(oldPath);
+      const readable = createReadStream(oldPath);
       const writeable = createWriteStream(newPath);
       await pipeline(readable, writeable);
     } catch {
