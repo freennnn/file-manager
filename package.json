@@ -1,0 +1,28 @@
+{
+  "name": "file-manager",
+  "version": "1.0.0",
+  "description": "Terminal file manager",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "start:with-args": "node src/index.js --username=\"I am not typing it myself User\"",
+    "test": "echo `Jest tests might be here one day (but most likely won't` && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freennnn/file-manager.git"
+  },
+  "keywords": [
+    "node",
+    "file",
+    "manager",
+    "terminal"
+  ],
+  "author": "Alex Pranevich, Pranesoft",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/freennnn/file-manager/issues"
+  },
+  "homepage": "https://github.com/freennnn/file-manager#readme"
+}
