@@ -6,11 +6,12 @@ import * as fileOperations from "./commands/fileOperations.js";
 import * as dirNavigation from "./commands/dirNavigation.js";
 import calculateHash from "./commands/hash.js";
 import printSystem from "./commands/system.js";
-import { compress, decompress } from "./commands/compress.js"
+import { compress, decompress } from "./commands/compress.js";
 
 export class FileManager {
   constructor() {
     this._currentDir = os.homedir();
+    this.rl = null; // Initialize readline interface property
 
     // need to .bind(this) due to loosing execution context after getting functions/methods back from object
     // obect is using for Strategy pattern to avoid big switch/if-s
@@ -29,17 +30,19 @@ export class FileManager {
       compress: this._compress.bind(this), // 2 args
       decompress: this._decompress.bind(this), // 2 args
       os: this._os.bind(this), // 1 arg
-    }
+    };
   }
 
   async _executeCommand(input) {
     const [command, ...args] = this._parseInput(input);
 
-
     let commandFunction = this._commands[command];
-    if (commandFunction) { // each command will validate received args on its own (args number and if filePath is valid)
+    if (commandFunction) {
+      // each command will validate received args on its own (args number and if filePath is valid)
       await this._commands[command](args); //bind(this)
-      console.log("success: great command, you are great, everything works - looks like max points are well deserved!")
+      console.log(
+        "success: great command, you are great, everything works - looks like max points are well deserved!"
+      );
     } else {
       throw new Error(ERRORS.invalidInput);
     }
@@ -50,16 +53,39 @@ export class FileManager {
   }
 
   async start() {
-    const intf = createInterface({ input: process.stdin, output: process.stdout });
-  
+    // Store the interface on the instance
+    this.rl = createInterface({ input: process.stdin, output: process.stdout });
+
     while (true) {
-      const input = await intf.question(`\nYou are currently in ${this._currentDir}\n`);
+      let input = null;
+      try {
+        // Use the instance property
+        input = await this.rl.question(
+          `\nYou are currently in ${this._currentDir}\n`
+        );
+      } catch (err) {
+        // Check if the error is the specific AbortError from Ctrl+C
+        if (err && err.code === "ABORT_ERR") {
+          // Ctrl+C was pressed, break the loop gracefully.
+          // The 'exit' event handler in index.js will print the goodbye message.
+          break;
+        } else {
+          // Re-throw other errors if needed, or log them
+          console.log("Error during input:", err);
+          break; // Or decide on other error handling
+        }
+      }
+
+      // Existing command execution logic
       try {
         await this._executeCommand(input);
       } catch (err) {
-        console.log(err.message);
+        console.log(err.message); // Log command execution errors
       }
     }
+
+    // Ensure the interface is closed if the loop exits unexpectedly (optional, as SIGINT/SIGTERM handlers also do this)
+    this.closeInterface();
   }
 
   _applyNewPath(path) {
@@ -93,8 +119,7 @@ export class FileManager {
     } else {
       throw new Error(ERRORS.invalidInput);
     }
-
-  }
+  };
 
   async _add(args) {
     if (args.length > 0) {
@@ -108,19 +133,24 @@ export class FileManager {
   async _cp(args) {
     if (args.length > 1) {
       const oldPath = this._applyNewPath(args[0]); // path to file
-      const newPath = pathModule.resolve(this._applyNewPath(args[1]), pathModule.basename(oldPath)); // args[1] - new directory path
+      const newPath = pathModule.resolve(
+        this._applyNewPath(args[1]),
+        pathModule.basename(oldPath)
+      ); // args[1] - new directory path
       // console.log(newPath);
       await fileOperations.cp(oldPath, newPath);
     } else {
       throw new Error(ERRORS.invalidInput);
     }
-
   }
 
   async _mv(args) {
     if (args.length > 1) {
       const oldPath = this._applyNewPath(args[0]); // args[0] - path_to_file
-      const newPath = pathModule.resolve(this._applyNewPath(args[1]), pathModule.basename(oldPath)); // args[1] - path_to_new_directory
+      const newPath = pathModule.resolve(
+        this._applyNewPath(args[1]),
+        pathModule.basename(oldPath)
+      ); // args[1] - path_to_new_directory
       await fileOperations.mv(oldPath, newPath);
     } else {
       throw new Error(ERRORS.invalidInput);
@@ -143,8 +173,8 @@ export class FileManager {
       const pathToFile = this._applyNewPath(args[0]);
       await fileOperations.rm(pathToFile);
     } else {
-        throw new Error(ERRORS.invalidInput);
-      }
+      throw new Error(ERRORS.invalidInput);
+    }
   }
 
   async _hash(args) {
@@ -187,7 +217,12 @@ export class FileManager {
   _exit() {
     process.exit();
   }
+
+  // Add a method to close the interface
+  closeInterface() {
+    if (this.rl) {
+      this.rl.close();
+      this.rl = null; // Clear the reference
+    }
+  }
 }
-
-
-
