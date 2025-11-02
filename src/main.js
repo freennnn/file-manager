@@ -49,7 +49,19 @@ export class FileManager {
   }
 
   _parseInput(input) {
-    return input.split(" ");
+    // Handle quoted strings with spaces: cd "My Documents" or cat 'my file.txt'
+    const regex = /[^\s"']+|"([^"]*)"|'([^']*)'/g;
+    const args = [];
+    let match;
+
+    while ((match = regex.exec(input)) !== null) {
+      // match[1] is the content inside double quotes
+      // match[2] is the content inside single quotes
+      // match[0] is the unquoted string
+      args.push(match[1] || match[2] || match[0]);
+    }
+
+    return args;
   }
 
   async start() {
