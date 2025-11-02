@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import * as fsExtra from "../fsExtra.js";
 import ERRORS from "../errors.js";
- 
+
 export async function cd(pathToDir) {
   let dirExistsAtPath = false;
   dirExistsAtPath = await fsExtra.isPathToValidDir(pathToDir);
@@ -17,11 +17,15 @@ export async function ls(pathToDir) {
     let elements = await fs.readdir(pathToDir, { withFileTypes: true });
     let directories = elements.filter(el => el.isDirectory());
     let files = elements.filter(el => el.isFile());
-    const dirStrings = directories.sort().map(el => { return { Name: el.name, Type: "Directory"}});
-    const fileStrings = files.sort().map(el => { return { Name: el.name, Type: "File"}});
+
+    // Case-insensitive sort
+    const sortByName = (a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+
+    const dirStrings = directories.sort(sortByName).map(el => { return { Name: el.name, Type: "Directory" } });
+    const fileStrings = files.sort(sortByName).map(el => { return { Name: el.name, Type: "File" } });
     console.table(dirStrings.concat(fileStrings));
 
-  } catch {
+  } catch (err) {
     throw new Error(ERRORS.operationFailed);
   }
 }

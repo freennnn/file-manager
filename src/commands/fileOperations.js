@@ -5,7 +5,11 @@ import * as fsExtra from "../fsExtra.js";
 import ERRORS from "../errors.js";
 
 export async function add(newFilePath) {
-  await fs.writeFile(newFilePath, "", { flag: "wx+" });
+  try {
+    await fs.writeFile(newFilePath, "", { flag: "wx+" });
+  } catch (err) {
+    throw new Error(ERRORS.operationFailed);
+  }
 }
 
 export async function rn(oldPath, newPath) {
@@ -14,7 +18,7 @@ export async function rn(oldPath, newPath) {
   if (fileExistsAtOldPath) {
     try {
       await fs.rename(oldPath, newPath);
-    } catch {
+    } catch (err) {
       throw new Error(ERRORS.operationFailed);
     }
   } else {
@@ -30,7 +34,7 @@ export async function cp(oldPath, newPath) {
       const readable = createReadStream(oldPath);
       const writeable = createWriteStream(newPath);
       await pipeline(readable, writeable);
-    } catch {
+    } catch (err) {
       throw new Error(ERRORS.operationFailed);
     }
   } else {
@@ -44,8 +48,7 @@ export async function rm(path) {
   if (fileExistsAtPath) {
     try {
       await fs.rm(path);
-    }
-    catch {
+    } catch (err) {
       throw new Error(ERRORS.operationFailed);
     }
   } else {
@@ -74,8 +77,7 @@ export async function cat(path) {
         readable.on("end", () => resolve());
         readable.on("error", (err) => reject(err));
       });
-    }
-    catch {
+    } catch (err) {
       throw new Error(ERRORS.operationFailed);
     }
   }

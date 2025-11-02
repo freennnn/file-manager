@@ -41,7 +41,7 @@ export class FileManager {
       // each command will validate received args on its own (args number and if filePath is valid)
       await this._commands[command](args); //bind(this)
       console.log(
-        "success: great command, you are great, everything works - looks like max points are well deserved!"
+        "success: great command, you are great, everything works"
       );
     } else {
       throw new Error(ERRORS.invalidInput);
@@ -105,7 +105,6 @@ export class FileManager {
   }
 
   async _up() {
-    // console.log("I'm up");
     const newPath = this._applyNewPath("..");
     this._currentDir = await dirNavigation.cd(newPath);
   }
@@ -125,7 +124,6 @@ export class FileManager {
 
   _cat = async (args) => {
     if (args.length > 0) {
-      //console.log(`cat args: ${args}`)
       const filePath = this._applyNewPath(args[0]);
       await fileOperations.cat(filePath);
     } else {
@@ -149,7 +147,6 @@ export class FileManager {
         this._applyNewPath(args[1]),
         pathModule.basename(oldPath)
       ); // args[1] - new directory path
-      // console.log(newPath);
       await fileOperations.cp(oldPath, newPath);
     } else {
       throw new Error(ERRORS.invalidInput);

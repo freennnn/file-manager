@@ -1,4 +1,3 @@
-
 export default function getUsername() {
   const args = process.argv.slice(2);
   let username = 'Linus Torvalds';
