@@ -67,9 +67,10 @@ export async function cat(path) {
 
       // For some stupid reason pipelene() after successfully writing to stdout emits an error!
       // await pipeline(readable, process.stdout, (err) => {console.log(err);});
+      // 2025 update: pipeline() has {end: false} option now, not closing stdout - and hence avoiding error
 
       readable.pipe(process.stdout);
-      await new Promise((resolve, rejects) => {
+      await new Promise((resolve, reject) => {
         readable.on("end", () => resolve());
         readable.on("error", (err) => reject(err));
       });
@@ -79,6 +80,6 @@ export async function cat(path) {
     }
   }
   else {
-      throw new Error(ERRORS.invalidInput);
+    throw new Error(ERRORS.invalidInput);
   }
 }
