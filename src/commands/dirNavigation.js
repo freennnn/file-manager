@@ -29,3 +29,11 @@ export async function ls(pathToDir) {
     throw new Error(ERRORS.operationFailed);
   }
 }
+
+export async function mkdir(newDirPath) {
+  try {
+    await fs.mkdir(newDirPath);
+  } catch (err) {
+    throw new Error(ERRORS.operationFailed);
+  }
+}
