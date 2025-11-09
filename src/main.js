@@ -21,6 +21,7 @@ export class FileManager {
       cd: this._cd.bind(this), // 1 arg
       cat: this._cat.bind(this), // 1 arg
       add: this._add.bind(this), // 1 arg
+      mkdir: this._mkdir.bind(this), // 1 arg
       cp: this._cp.bind(this), // 2 args
       ".exit": this._exit.bind(this),
       mv: this._mv.bind(this), // 2 args
@@ -135,6 +136,15 @@ export class FileManager {
     if (args.length > 0) {
       const newFilePath = this._applyNewPath(args[0]);
       await fileOperations.add(newFilePath);
+    } else {
+      throw new Error(ERRORS.invalidInput);
+    }
+  }
+
+  async _mkdir(args) {
+    if (args.length > 0) {
+      const newDirPath = this._applyNewPath(args[0]);
+      await dirNavigation.mkdir(newDirPath);
     } else {
       throw new Error(ERRORS.invalidInput);
     }

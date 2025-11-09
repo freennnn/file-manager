@@ -74,7 +74,10 @@ export async function cat(path) {
 
       readable.pipe(process.stdout);
       await new Promise((resolve, reject) => {
-        readable.on("end", () => resolve());
+        readable.on("end", () => {
+          process.stdout.write('\n'); // Add newline after file content
+          resolve();
+        });
         readable.on("error", (err) => reject(err));
       });
     } catch (err) {
