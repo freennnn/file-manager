@@ -1,26 +1,45 @@
-import crypto from 'crypto';
-import { createReadStream } from 'fs';
-import * as fsExtra from '../fsExtra.js';
-import ERRORS from "../errors.js";
+import crypto from "node:crypto";
+import { createReadStream } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-export default async function calculateHash(pathToFile) {
-  let fileExistsAtPath = false;
-  fileExistsAtPath = await fsExtra.isPathToValidFile(pathToFile);
-  if (fileExistsAtPath) {
-    return new Promise((resolve, reject) => {
-      const hash = crypto.createHash('sha256');
-      const rs = createReadStream(pathToFile);
-      rs.on('data', (data) => hash.update(data));
-      rs.on('end', () => {
-        let hashValue = hash.digest('hex');
-        console.log(hashValue);
-        resolve(hashValue);
-      });
-      rs.on('error', (err) => { reject(err) });
-    });
-  } else {
-    throw new Error(ERRORS.invalidInput);
+const SUPPORTED = new Set(["sha256", "md5", "sha512"]);
+
+function operationFailed() {
+  const err = new Error("Operation failed");
+  err.code = "OPERATION_FAILED";
+  return err;
+}
+
+export async function hashFile({
+  absoluteInputPath,
+  algorithm = "sha256",
+  save = false,
+}) {
+  if (!SUPPORTED.has(algorithm)) {
+    throw operationFailed();
   }
 
+  const hash = crypto.createHash(algorithm);
 
-};
+  const digestHex = await new Promise((resolve, reject) => {
+    const rs = createReadStream(absoluteInputPath);
+
+    rs.on("data", (chunk) => hash.update(chunk));
+    rs.on("end", () => resolve(hash.digest("hex")));
+    rs.on("error", () => reject(operationFailed()));
+  });
+
+  console.log(`${algorithm}: ${digestHex}`);
+
+  if (save) {
+    const dir = path.dirname(absoluteInputPath);
+    const base = path.basename(absoluteInputPath);
+    const outPath = path.join(dir, `${base}.${algorithm}`);
+    try {
+      await fs.writeFile(outPath, `${digestHex}\n`);
+    } catch {
+      throw operationFailed();
+    }
+  }
+}

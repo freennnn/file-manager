@@ -1,12 +1,15 @@
 {
-  "name": "file-manager",
+  "name": "data-processing-cli",
   "version": "1.0.0",
-  "description": "Terminal file manager",
+  "description": "Data Processing CLI",
   "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": ">=24.10.0"
+  },
   "scripts": {
-    "start": "node src/index.js",
-    "start:with-args": "node src/index.js --username=\"I am not typing it myself User\""
+    "start": "node src/main.js",
+    "start:with-args": "node src/main.js --username=\"I am not typing it myself User\""
   },
   "repository": {
     "type": "git",
