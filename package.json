@@ -1,0 +1,30 @@
+{
+  "name": "data-processing-cli",
+  "version": "1.0.0",
+  "description": "Data Processing CLI",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=24.10.0"
+  },
+  "scripts": {
+    "start": "node src/main.js",
+    "start:with-args": "node src/main.js --username=\"I am not typing it myself User\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freennnn/file-manager.git"
+  },
+  "keywords": [
+    "node",
+    "file",
+    "manager",
+    "terminal"
+  ],
+  "author": "Alex Pranevich, Pranesoft",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/freennnn/file-manager/issues"
+  },
+  "homepage": "https://github.com/freennnn/file-manager#readme"
+}
