@@ -8,6 +8,9 @@ import { hashFile } from './commands/hash.js'
 import { hashCompare } from './commands/hashCompare.js'
 import { csvToJson } from './commands/csvToJson.js'
 import { jsonToCsv } from './commands/jsonToCsv.js'
+import { encryptFile } from './commands/encrypt.js'
+import { decryptFile } from './commands/decrypt.js'
+import { logStats } from './commands/logStats.js'
 
 const INVALID_INPUT = 'Invalid input'
 const OPERATION_FAILED = 'Operation failed'
@@ -134,6 +137,44 @@ async function builtInDispatch({ command, args, currentDir }) {
     return { currentDir }
   }
 
+  if (command === 'encrypt') {
+    const flags = parseFlags(args ?? [])
+    if (!flags.input || !flags.output || !flags.password) throw invalidInput()
+    const inputPath = resolvePath(currentDir, flags.input)
+    const outputPath = resolvePath(currentDir, flags.output)
+    if (!inputPath || !outputPath) throw invalidInput()
+    await encryptFile({
+      absoluteInputPath: inputPath,
+      absoluteOutputPath: outputPath,
+      password: flags.password,
+    })
+    return { currentDir }
+  }
+
+  if (command === 'decrypt') {
+    const flags = parseFlags(args ?? [])
+    if (!flags.input || !flags.output || !flags.password) throw invalidInput()
+    const inputPath = resolvePath(currentDir, flags.input)
+    const outputPath = resolvePath(currentDir, flags.output)
+    if (!inputPath || !outputPath) throw invalidInput()
+    await decryptFile({
+      absoluteInputPath: inputPath,
+      absoluteOutputPath: outputPath,
+      password: flags.password,
+    })
+    return { currentDir }
+  }
+
+  if (command === 'log-stats') {
+    const flags = parseFlags(args ?? [])
+    if (!flags.input || !flags.output) throw invalidInput()
+    const inputPath = resolvePath(currentDir, flags.input)
+    const outputPath = resolvePath(currentDir, flags.output)
+    if (!inputPath || !outputPath) throw invalidInput()
+    await logStats({ absoluteInputPath: inputPath, absoluteOutputPath: outputPath })
+    return { currentDir }
+  }
+
   return await defaultDispatch()
 }
 
@@ -145,42 +186,54 @@ export async function startRepl({
   let currentDir = initialDir
   printCwd(currentDir)
   const rl = createInterface({ input: process.stdin, output: process.stdout })
+  rl.setPrompt('>')
 
-  const onSigint = () => {
-    rl.close()
-  }
+  let closed = false
+  let chain = Promise.resolve()
 
+  const onSigint = () => rl.close()
   process.once('SIGINT', onSigint)
 
-  try {
-    while (true) {
-      let line
-      try {
-        line = await rl.question('>')
-      } catch {
-        break
-      }
+  rl.on('SIGINT', onSigint)
 
-      const trimmed = String(line ?? '').trim()
-      if (!trimmed) continue
+  rl.on('line', (line) => {
+    const trimmed = String(line ?? '').trim()
+    if (!trimmed) {
+      rl.prompt()
+      return
+    }
 
-      if (trimmed === '.exit') {
-        break
-      }
+    if (trimmed === '.exit') {
+      rl.close()
+      return
+    }
 
-      const [command, ...args] = parseInput(trimmed)
+    const [command, ...args] = parseInput(trimmed)
 
-      try {
+    chain = chain
+      .then(async () => {
         const result = await dispatch({ command, args, currentDir })
         if (result?.currentDir) currentDir = result.currentDir
         printCwd(currentDir)
-      } catch (err) {
+      })
+      .catch((err) => {
         console.log(normalizeError(err))
-      }
-    }
-  } finally {
-    process.removeListener('SIGINT', onSigint)
-    rl.close()
-    console.log(GOODBYE)
-  }
+      })
+      .finally(() => {
+        if (!closed) rl.prompt()
+      })
+  })
+
+  rl.prompt()
+
+  await new Promise((resolve) => {
+    rl.once('close', () => {
+      closed = true
+      resolve()
+    })
+  })
+
+  await chain
+  process.removeListener('SIGINT', onSigint)
+  console.log(GOODBYE)
 }
